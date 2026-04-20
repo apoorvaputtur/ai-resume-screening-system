@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Ranking Results</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <h1>📄 Resume Ranking Results</h1>
+    <a href="/dashboard" class="btn">⬅ Back</a>
+</nav>
+
+<!-- MAIN CONTAINER -->
+<div class="page-container">
+
+    <!-- RESULTS TABLE CARD -->
+    <div class="card">
+        <h2>Ranking Table</h2>
+
+        {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Resume Name</th>
+                    <th>Match %</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ r.name }}</td>
+                    <td>
+                        <span class="score-badge">{{ r.score }}%</span>
+                    </td>
+                    <td>
+                        <!-- VIEW -->
+                        <a href="/resumes/{{ r.name }}" target="_blank" class="view-link">
+                            View
+                        </a>
+
+                        <!-- DOWNLOAD -->
+                        <a href="/download/{{ r.name }}" class="download-link">
+                            Download
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p class="empty">No resumes found.</p>
+        {% endif %}
+    </div>
+
+    <!-- CHART CARD -->
+    {% if results %}
+    <div 
+        id="chartData"
+        data-labels='{{ results | map(attribute="name") | list | tojson }}'
+        data-scores='{{ results | map(attribute="score") | list | tojson }}'>
+    </div>
+
+    <div class="card chart-card">
+        <h2>Match Percentage Visualization</h2>
+        <canvas id="scoreChart"></canvas>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- CHART SCRIPT -->
+<script>
+    const chartDiv = document.getElementById("chartData");
+
+    if (chartDiv) {
+        const labels = JSON.parse(chartDiv.dataset.labels);
+        const scores = JSON.parse(chartDiv.dataset.scores);
+
+        const ctx = document.getElementById("scoreChart");
+
+        if (ctx) {
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Resume Match %",
+                        data: scores,
+                        backgroundColor: "#3b82f6",
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

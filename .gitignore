@@ -1,0 +1,9 @@
+# Ignore resume folders anywhere
+resumes/
+resume pdf/
+Resumes PDF/
+backend/Resumes PDF/
+
+# Ignore cache
+__pycache__/
+*.pyc
